@@ -1,0 +1,113 @@
+﻿@model IEnumerable<WebStoreApplication.Controllers.ProduceBase>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<script src="~/Scripts/jquery-1.9.1.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#AddToCart").click(function (e) {
+            e.preventDefault();
+
+            var pageObj = {};
+            pageObj.Id = $("#Id").val();
+            pageObj.Name = $("#Name").val();
+            pageObj.Location = $("#Location").val();
+            pageObj.Price = $("#Price").val();
+
+            $.ajax({
+                url: "/Order/AddToCart",
+                method: "POST",
+                data: {
+                    page: pageObj
+                },
+                success: function (data) {
+                    alert(data);
+                },
+                error: function () {
+                    alert("Ajax failed");
+                }
+            })
+        })
+    })
+</script>   
+
+<p>
+    @Html.ActionLink("Create New Product", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Id)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Location)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Price)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Id)
+            @Html.HiddenFor(modelItem => item.Id)
+
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+            @Html.HiddenFor(modelItem => item.Name)
+
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Location)
+            @Html.HiddenFor(modelItem => item.Location)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Price)
+            @Html.HiddenFor(modelItem => item.Price)
+
+        </td>
+        <td>
+            
+            @using (Ajax.BeginForm("AddToCart", "Order", FormMethod.Post, new AjaxOptions
+            {
+                HttpMethod = "POST",
+                OnSuccess = "SuccessMessage",
+                OnFailure = "FailMessage",
+                UpdateTargetId = "resultTarget"
+            }))
+            {
+                @Html.AntiForgeryToken()
+
+                <input type="submit" value="Add to Cart" style="height:25px;width:100px" />
+
+            }
+            <div id="resultTarget">
+                @Html.HiddenFor(modelItem => item.Id)
+
+            </div>
+
+            @using (Html.BeginForm("Details", "Produce", FormMethod.Get, new { name = "item.Id", id = "item.Id" }))
+            {
+
+                <input value="Details" type="button" style="height:25px;width:100px" onclick="location.href='@Url.Action("Details", "Produce", new { id = item.Id })'" />
+            }
+
+        </td>
+    </tr>
+}
+
+</table>
+<p>
+    @Html.ActionLink("Checkout", "Index", "Order")
+</p>
